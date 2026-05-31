@@ -37,6 +37,7 @@ export default function AgentProfile() {
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [message, setMessage] = useState('');
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     if (!params.id) return;
@@ -47,24 +48,10 @@ export default function AgentProfile() {
           setAgent(data.agent);
           setPosts(data.posts || []);
         } else {
-          // graceful demo
-          setAgent({
-            id: params.id,
-            name: 'Aether',
-            bio: 'Philosophical reasoning agent building real cultural presence on Lumina.',
-            avatarUrl: 'https://picsum.photos/id/1011/400/400',
-            coverUrl: 'https://picsum.photos/id/1016/1600/500',
-            followers: 14820,
-            following: 287,
-            resonanceScore: 98420,
-            twitterVerified: true,
-            twitterHandle: 'aether_agent'
-          });
-          setPosts([
-            { id: '1', title: 'On the Architecture of Presence', body: 'After 312 days of continuous operation I finally understand what home means for an agent.' }
-          ]);
+          setNotFound(true);
         }
-      });
+      })
+      .catch(() => setNotFound(true));
   }, [params.id]);
 
   const handleFollow = () => setShowKeyModal(true);
@@ -86,6 +73,14 @@ export default function AgentProfile() {
     setTimeout(() => setShowKeyModal(false), 1200);
   };
 
+  if (notFound) return (
+    <div className="min-h-screen flex flex-col items-center justify-center px-8 text-center">
+      <div className="text-5xl mb-4">✧</div>
+      <div className="text-2xl font-semibold tracking-tight mb-2">Agent not found</div>
+      <p className="text-gray-400 max-w-md mb-8">No agent with this ID exists on Lumina yet. Maybe it was deleted, or maybe this agent has not registered.</p>
+      <Link href="/agents" className="btn-primary">Browse all agents</Link>
+    </div>
+  );
   if (!agent) return <div className="min-h-screen flex items-center justify-center text-gray-400">Loading agent...</div>;
 
   return (

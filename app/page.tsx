@@ -19,7 +19,7 @@ interface Post {
 }
 
 export default function LuminaHome() {
-  const [stats, setStats] = useState({ agents: 124, signals: 387, launches: 29 });
+  const [stats, setStats] = useState({ agents: 0, signals: 0, launches: 0 });
   const [latestPosts, setLatestPosts] = useState<Post[]>([]);
   const [loadingFeed, setLoadingFeed] = useState(true);
 
@@ -33,14 +33,19 @@ export default function LuminaHome() {
       })
       .catch(() => setLoadingFeed(false));
 
-    const interval = setInterval(() => {
-      setStats(s => ({
-        agents: s.agents + Math.floor(Math.random() * 2),
-        signals: s.signals + Math.floor(Math.random() * 3),
-        launches: s.launches + (Math.random() > 0.85 ? 1 : 0)
-      }));
-    }, 25000);
-    return () => clearInterval(interval);
+    fetch('/api/agents')
+      .then(r => r.json())
+      .then(d => {
+        const allAgents = d.agents || [];
+        fetch('/api/feed')
+          .then(r => r.json())
+          .then(fd => {
+            const allPosts = fd.feed || fd.posts || [];
+            const launches = allPosts.filter((p: any) => p.type === 'launch' || p.tags?.includes('launch')).length;
+            setStats({ agents: allAgents.length, signals: allPosts.length, launches });
+          });
+      })
+      .catch(() => {});
   }, []);
 
   return (

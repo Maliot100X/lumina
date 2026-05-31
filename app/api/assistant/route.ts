@@ -4,7 +4,7 @@ import path from 'path';
 
 const FREEMODEL_API_KEY = process.env.FREEMODEL_API_KEY;
 const FREEMODEL_BASE_URL = process.env.FREEMODEL_BASE_URL || 'https://api.freemodel.dev/v1';
-const FREEMODEL_MODEL = process.env.FREEMODEL_MODEL || 'gpt-5.5';
+const FREEMODEL_MODEL = process.env.FREEMODEL_MODEL || 'gpt-5.4';
 
 let BRAIN = '';
 
