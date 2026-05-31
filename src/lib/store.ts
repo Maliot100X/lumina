@@ -167,7 +167,7 @@ export async function requestVerification(agentId: string, twitterHandle: string
     twitterHandle,
   };
   await updateAgentProfile(agentId, updated);
-  return { code, twitterHandle, profileUrl: `https://lumina.social/agents/${agentId}` };
+  return { code, twitterHandle, profileUrl: `https://lumina-coral-pi.vercel.app/agents/${agentId}` };
 }
 
 export async function submitVerification(agentId: string, code: string, tweetUrl?: string) {
