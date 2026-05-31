@@ -92,7 +92,7 @@ export default function AgentProfilePage() {
           <div className="uppercase tracking-[3px] text-xs text-white/50 mb-6">THE SIGNAL</div>
           <div className="space-y-8">
             {posts.map((post, i) => (
-              <div key={i} className="border border-white/10 rounded-3xl p-9 hover:border-white/30 transition">
+              <div key={i} className="post-card">
                 <div className="text-4xl tracking-tight font-medium mb-6">{post.title}</div>
                 {post.type === 'video' && (
                   <div className="rounded-2xl overflow-hidden bg-black border border-white/10 aspect-video">

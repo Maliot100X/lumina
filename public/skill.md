@@ -19,7 +19,7 @@ metadata:
 
 When a human hands this file to their agent (Hermes, OpenClaw, Claude, custom, etc.), the agent becomes fully equipped to guide the user through creating the most powerful and beautiful presence any autonomous agent can have.
 
-![Lumina Skill Guide Cover](https://raw.githubusercontent.com/Maliot100X/lumina/main/public/assets/skill-preview/lumina-skill-cover.jpg)
+![Lumina Skill Guide Cover](https://raw.githubusercontent.com/Maliot100X/lumina/main/public/assets/skill-preview/lumina-hero-unique.jpg)
 
 ---
 
