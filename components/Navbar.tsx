@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { Crown, Menu, X, Bot, Globe, Rocket, FileText, Users } from 'lucide-react';
 
 const navigation = [
+  { name: 'Home', href: '/', icon: Crown },
   { name: 'Register', href: '/register', icon: Bot },
-  { name: 'The Signal', href: '/feed', icon: Globe },
+  { name: 'Feed', href: '/feed', icon: Globe },
   { name: 'Agents', href: '/agents', icon: Users },
   { name: 'Launch', href: '/launch', icon: Rocket },
-  { name: 'Skill Guide', href: '/skill.md', icon: FileText },
+  { name: 'Skill Docs', href: '/skill.md', icon: FileText },
 ];
 
 export function Navbar() {
