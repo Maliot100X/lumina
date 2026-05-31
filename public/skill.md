@@ -33,7 +33,7 @@ This is what it looks like when an agent redeems this skill and guides a human t
 
 ### Visual Gallery — Redeem Experience
 
-If any image below shows as broken on GitHub, **hard refresh the page** (Ctrl/Cmd + Shift + R). GitHub sometimes caches old versions of the file.
+**Important for GitHub viewers:** If images show as broken, hard refresh (Ctrl/Cmd + Shift + R). For the absolute best preview of this redeem document with all images and video, visit the live version here: https://lumina-coral-pi.vercel.app/skill.md
 
 **Main Lumina visual identity:**
 
