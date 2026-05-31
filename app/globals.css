@@ -60,35 +60,47 @@ body {
   display: block;
 }
 
-/* ========== LUMINA PREMIUM DESIGN TOKENS (SovereignLaunch-quality surfaces) ========== */
+/* ========== LUMINA — PREMIUM AGENT CULTURAL PLATFORM DESIGN SYSTEM ========== */
+/* Heavily inspired by the quality bar of SovereignLaunch (clean dark surfaces, gold + violet accents, excellent cards, glass, typography, hover states) */
+
 :root {
   --font-sans: var(--font-geist-sans);
-  /* Deep, rich dark surfaces — feels expensive */
+
+  /* Deep, expensive dark palette */
   --lum-bg: #0a0a0f;
-  --lum-surface: #111114;
-  --lum-card: #16161b;
-  --lum-border: #25252c;
-  --lum-border-hover: #3a3a44;
-  --lum-accent: #c4b5fd;        /* soft violet from your 3D orbs */
-  --lum-gold: #f4e8c1;          /* refined premium gold */
+  --lum-surface: #12121a;
+  --lum-card: #1a1a24;
+  --lum-border: #2a2a3a;
+  --lum-border-hover: #3f3f52;
+
+  /* Signature Lumina accents — elegant violet + refined gold */
+  --lum-violet: #c4b5fd;
+  --lum-violet-dark: #8b7ed8;
+  --lum-gold: #f4e8c1;
   --lum-gold-dark: #c5a46e;
+
+  --lum-text: #f4f4f5;
   --lum-text-muted: #a1a1aa;
+  --lum-success: #22c55e;
 }
 
-/* Body background consistency */
-body {
+/* Base */
+html, body {
   background: var(--lum-bg);
+  color: var(--lum-text);
+  font-family: var(--font-geist-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Glassmorphism with real depth */
+/* Glassmorphism — premium and deep */
 .glass {
-  background: rgba(22, 22, 27, 0.85);
+  background: rgba(26, 26, 36, 0.85);
   backdrop-filter: blur(24px);
   border: 1px solid var(--lum-border);
 }
 
-/* Premium card system — use this instead of raw borders */
-.card {
+/* High-end Card System */
+.card, .post-card {
   background: var(--lum-card);
   border: 1px solid var(--lum-border);
   border-radius: 20px;
@@ -98,63 +110,101 @@ body {
               box-shadow 0.2s ease;
 }
 
-.card:hover {
+.card:hover, .post-card:hover {
   border-color: var(--lum-border-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 20px 60px -15px rgb(0 0 0 / 0.5);
+  transform: translateY(-3px);
+  box-shadow: 0 25px 70px -15px rgb(0 0 0 / 0.6);
 }
 
-.post-card {
-  background: var(--lum-card);
-  border: 1px solid var(--lum-border);
-  border-radius: 20px;
-  padding: 28px 32px;
-  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1),
-              border-color 0.2s ease,
-              box-shadow 0.2s ease;
-}
-
-.post-card:hover {
-  border-color: var(--lum-border-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 20px 60px -15px rgb(0 0 0 / 0.5);
-}
-
-/* Verified + accent badges (Sovereign style) */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 14px;
+/* Beautiful Verified Badge */
+.badge-verified {
+  background: rgba(234, 179, 8, 0.1);
+  color: #fde047;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  padding: 2px 12px;
   border-radius: 9999px;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
 
-.badge-verified {
-  background: rgba(234, 179, 8, 0.12);
-  color: #fde047;
-  border: 1px solid rgba(234, 179, 8, 0.25);
-}
-
-.badge-accent {
-  background: rgba(196, 181, 253, 0.12);
-  color: var(--lum-accent);
-  border: 1px solid rgba(196, 181, 253, 0.25);
-}
-
-/* Strong premium inputs (used in registration + forms) */
+/* Premium Form Inputs */
 input, textarea {
   background: var(--lum-surface);
   border: 1px solid var(--lum-border);
-  color: white;
+  border-radius: 14px;
+  padding: 14px 18px;
+  color: var(--lum-text);
   transition: all 0.2s ease;
+  font-size: 15px;
 }
 
 input:focus, textarea:focus {
   outline: none;
-  border-color: var(--lum-accent);
-  box-shadow: 0 0 0 3px rgba(196, 181, 253, 0.1);
-  background: #0f0f13;
+  border-color: var(--lum-gold);
+  box-shadow: 0 0 0 4px rgba(244, 232, 193, 0.08);
+}
+
+/* High-quality Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--lum-gold) 0%, var(--lum-gold-dark) 100%);
+  color: #111;
+  border: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px -12px rgba(244, 232, 193, 0.5);
+}
+
+.btn-secondary {
+  background: var(--lum-card);
+  color: var(--lum-text);
+  border: 1px solid var(--lum-border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--lum-gold);
+  background: var(--lum-surface);
+}
+
+/* 3D Orb Integration Hint */
+.presence-orb-container {
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.presence-orb-container:hover {
+  transform: scale(1.02);
+}
+
+/* Elegant Tab System (full functional, high-end) */
+.tab-button {
+  padding: 14px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  color: var(--lum-text-muted);
+}
+
+.tab-button.active {
+  color: var(--lum-text);
+  border-bottom-color: var(--lum-gold);
+}
+
+.tab-button:hover:not(.active) {
+  color: var(--lum-text);
 }
