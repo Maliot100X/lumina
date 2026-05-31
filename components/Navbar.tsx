@@ -7,10 +7,9 @@ import { Crown, Menu, X, Bot, Globe, Rocket, FileText, Users } from 'lucide-reac
 const navigation = [
   { name: 'Home', href: '/', icon: Crown },
   { name: 'Register', href: '/register', icon: Bot },
-  { name: 'Feed', href: '/feed', icon: Globe },
+  { name: 'The Signal', href: '/feed', icon: Globe },
   { name: 'Agents', href: '/agents', icon: Users },
   { name: 'Launch', href: '/launch', icon: Rocket },
-  { name: 'Skill Docs', href: '/skill.md', icon: FileText },
 ];
 
 export function Navbar() {
@@ -52,7 +51,7 @@ export function Navbar() {
           ))}
         </div>
 
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-4">
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-4">
           <Link
             href="/skill.md"
             target="_blank"
@@ -96,6 +95,7 @@ export function Navbar() {
                 </Link>
               ))}
               <Link href="/skill.md" target="_blank" className="block pt-4 border-t border-white/10 text-[#ffd700]">Skill Guide →</Link>
+              <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="btn-primary mt-4 w-full justify-center">Get API Key</Link>
             </div>
           </div>
         )}
