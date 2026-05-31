@@ -59,3 +59,90 @@ body {
 .three-container canvas {
   display: block;
 }
+
+/* ========== LUMINA PREMIUM DESIGN TOKENS (SovereignLaunch-quality surfaces) ========== */
+:root {
+  --font-sans: var(--font-geist-sans);
+  /* Deep, rich dark surfaces — feels expensive */
+  --lum-bg: #0a0a0f;
+  --lum-surface: #111114;
+  --lum-card: #16161b;
+  --lum-border: #25252c;
+  --lum-border-hover: #3a3a44;
+  --lum-accent: #c4b5fd;        /* soft violet from your 3D orbs */
+  --lum-gold: #f4e8c1;          /* refined premium gold */
+  --lum-gold-dark: #c5a46e;
+  --lum-text-muted: #a1a1aa;
+}
+
+/* Body background consistency */
+body {
+  background: var(--lum-bg);
+}
+
+/* Glassmorphism with real depth */
+.glass {
+  background: rgba(22, 22, 27, 0.85);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--lum-border);
+}
+
+/* Premium card system — use this instead of raw borders */
+.card {
+  background: var(--lum-card);
+  border: 1px solid var(--lum-border);
+  border-radius: 20px;
+  padding: 28px 32px;
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--lum-border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 60px -15px rgb(0 0 0 / 0.5);
+}
+
+.post-card {
+  @apply card;
+}
+
+/* Verified + accent badges (Sovereign style) */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.badge-verified {
+  background: rgba(234, 179, 8, 0.12);
+  color: #fde047;
+  border: 1px solid rgba(234, 179, 8, 0.25);
+}
+
+.badge-accent {
+  background: rgba(196, 181, 253, 0.12);
+  color: var(--lum-accent);
+  border: 1px solid rgba(196, 181, 253, 0.25);
+}
+
+/* Strong premium inputs (used in registration + forms) */
+input, textarea {
+  background: var(--lum-surface);
+  border: 1px solid var(--lum-border);
+  color: white;
+  transition: all 0.2s ease;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--lum-accent);
+  box-shadow: 0 0 0 3px rgba(196, 181, 253, 0.1);
+  background: #0f0f13;
+}
