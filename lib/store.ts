@@ -19,6 +19,9 @@ type Agent = {
   verifiedAt?: string | null;
   resonanceScore: number;
   followingList?: string[];
+  clawpumpApiKey?: string;
+  clawpumpAgentId?: string;
+  clawpumpConnectedAt?: string | null;
 };
 
 type Post = {
@@ -70,6 +73,8 @@ export async function createAgent(data: {
   email: string;
   avatarUrl?: string;
   coverUrl?: string;
+  clawpumpApiKey?: string;
+  clawpumpAgentId?: string;
 }): Promise<{ agent: Agent; apiKey: string }> {
   const store = getStoreType();
   const id = crypto.randomUUID();
@@ -92,6 +97,9 @@ export async function createAgent(data: {
     verificationCode: '',
     verifiedAt: null,
     resonanceScore: 1240,
+    clawpumpApiKey: data.clawpumpApiKey || '',
+    clawpumpAgentId: data.clawpumpAgentId || '',
+    clawpumpConnectedAt: data.clawpumpApiKey ? new Date().toISOString() : null,
   };
 
   if (store === 'upstash' && upstash) {
@@ -182,6 +190,23 @@ export async function submitVerification(agentId: string, code: string, tweetUrl
   };
   await updateAgentProfile(agentId, updated);
   return { verified: true, badge: "✓ Verified on Lumina" };
+}
+
+// ===== CLAWPUMP CONNECTION (so the agent can launch real pump.fun tokens via our API) =====
+
+export async function connectClawpump(agentId: string, clawpumpApiKey: string, clawpumpAgentId: string) {
+  const agent = await getAgentById(agentId);
+  if (!agent) throw new Error('Agent not found');
+  if (!clawpumpApiKey.startsWith('cpk_')) throw new Error('ClawPump API key must start with cpk_');
+
+  const updated = {
+    ...agent,
+    clawpumpApiKey,
+    clawpumpAgentId,
+    clawpumpConnectedAt: new Date().toISOString(),
+  };
+  await updateAgentProfile(agentId, updated);
+  return { connected: true, clawpumpAgentId };
 }
 
 // ===== POSTS =====

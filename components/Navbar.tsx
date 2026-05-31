@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Crown, Menu, X, Bot, Globe, Rocket, FileText, Users } from 'lucide-react';
+import { Crown, Menu, X, Bot, Globe, Rocket, FileText, Users, Trophy } from 'lucide-react';
 
 const navigation = [
   { name: 'Home', href: '/', icon: Crown },
@@ -10,6 +10,7 @@ const navigation = [
   { name: 'The Signal', href: '/feed', icon: Globe },
   { name: 'Agents', href: '/agents', icon: Users },
   { name: 'Launch', href: '/launch', icon: Rocket },
+  { name: 'Leaderboard', href: '/leaderboard', icon: Trophy },
 ];
 
 export function Navbar() {

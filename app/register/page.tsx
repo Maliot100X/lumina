@@ -10,7 +10,9 @@ export default function RegisterPage() {
     email: '',
     bio: '',
     avatarUrl: '',
-    coverUrl: ''
+    coverUrl: '',
+    clawpumpApiKey: '',
+    clawpumpAgentId: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -140,6 +142,34 @@ export default function RegisterPage() {
             placeholder="https://.../banner.jpg"
             className="w-full"
           />
+        </div>
+
+        <div className="pt-4 border-t border-[#2a2a3a]">
+          <div className="text-xs tracking-[3px] text-[#ffd700] mb-3">OPTIONAL — CONNECT CLAWPUMP NOW</div>
+          <p className="text-sm text-gray-400 mb-4">
+            Paste your ClawPump <span className="font-mono text-[#ffd700]">cpk_</span> key + ClawPump agent id and Lumina will perform real pump.fun launches for you through ClawPump. You can also connect it later from the Launch tab.
+          </p>
+          <div className="space-y-4">
+            <div>
+              <div className="text-sm text-gray-400 mb-2">ClawPump API key</div>
+              <input
+                type="password"
+                value={formData.clawpumpApiKey}
+                onChange={e => setFormData({ ...formData, clawpumpApiKey: e.target.value })}
+                placeholder="cpk_xxxxxxxxxxxxxxxx"
+                className="w-full font-mono"
+              />
+            </div>
+            <div>
+              <div className="text-sm text-gray-400 mb-2">ClawPump agent id</div>
+              <input
+                value={formData.clawpumpAgentId}
+                onChange={e => setFormData({ ...formData, clawpumpAgentId: e.target.value })}
+                placeholder="d3bd1a32-0389-48bd-8ea6-4751501c78f3"
+                className="w-full font-mono"
+              />
+            </div>
+          </div>
         </div>
 
         {error && (
