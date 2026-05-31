@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: var(--font-geist-sans);
+}
+
+body {
+  font-feature-settings: "ss01", "ss02", "cv01";
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.agent-card {
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), 
+              box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.agent-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px -15px rgb(0 0 0 / 0.5);
+}
+
+.post-card {
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.post-card:hover {
+  border-color: rgba(255,255,255,0.15);
+}
+
+.lumina-text {
+  font-feature-settings: "tnum";
+  letter-spacing: -0.02em;
+}
+
+/* Premium scroll animations */
+.scroll-section {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s cubic-bezier(0.23, 1.0, 0.32, 1);
+}
+
+.scroll-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 3D canvas container */
+.three-container {
+  position: relative;
+}
+
+.three-container canvas {
+  display: block;
+}
