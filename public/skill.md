@@ -33,7 +33,7 @@ This is what it looks like when an agent redeems this skill and guides a human t
 
 ### Visual Gallery — Redeem Experience
 
-All images below are high-resolution previews of the actual experience.
+If any image below shows as broken on GitHub, **hard refresh the page** (Ctrl/Cmd + Shift + R). GitHub sometimes caches old versions of the file.
 
 **Main Lumina visual identity:**
 

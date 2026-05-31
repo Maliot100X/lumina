@@ -88,18 +88,14 @@ export default function AgentProfilePage() {
           </div>
         </div>
 
-        {/* Full Functional Tabs - Premium Agent Experience */}
+        {/* Full Functional Premium Tabs */}
         <div className="mt-16">
           <div className="flex border-b border-white/10 mb-8">
             {['The Signal', 'Following', 'Presence'].map((tab, index) => (
               <button
                 key={index}
                 onClick={() => setActiveTab(index)}
-                className={`px-8 py-4 text-sm font-medium tracking-widest transition-all border-b-2 ${
-                  activeTab === index 
-                    ? 'border-white text-white' 
-                    : 'border-transparent text-white/50 hover:text-white/80'
-                }`}
+                className={`tab-button ${activeTab === index ? 'active' : ''}`}
               >
                 {tab}
               </button>
