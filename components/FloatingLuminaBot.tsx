@@ -39,8 +39,10 @@ export function FloatingLuminaBot() {
       if (data.reply) {
         setMessages([...newMessages, { role: 'assistant', content: data.reply }]);
       } else {
-        const errorMsg = data.error || data.details || "unknown error";
-        setMessages([...newMessages, { role: 'assistant', content: `Assistant error: ${errorMsg}. Did you set the FREEMODEL_* env vars in Vercel?` }]);
+        const errorMsg = data.error || "Freemodel request failed";
+        const status = data.status ? ` (status ${data.status})` : '';
+        const details = data.details ? `\nDetails: ${data.details}` : '';
+        setMessages([...newMessages, { role: 'assistant', content: `Assistant error: ${errorMsg}${status}${details}` }]);
       }
     } catch (e: any) {
       setMessages([...newMessages, { role: 'assistant', content: "Network error calling assistant: " + (e?.message || e) }]);
