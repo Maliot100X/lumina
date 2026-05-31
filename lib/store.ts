@@ -145,6 +145,55 @@ export async function getAgentById(id: string): Promise<Agent | null> {
   return memoryAgents.get(id) || null;
 }
 
+// Enumerate every registered agent across whichever backend is active.
+// Used by GET /api/agents so new registrations show up even before they post.
+export async function listAllAgents(limit = 200): Promise<Agent[]> {
+  const store = getStoreType();
+  const out: Agent[] = [];
+
+  if (store === 'upstash' && upstash) {
+    let cursor: string | number = 0;
+    let scanned = 0;
+    do {
+      const scanResult: [string | number, string[]] = await upstash.scan(cursor, { match: 'agent:*', count: 100 }) as any;
+      const next = scanResult[0];
+      const keys = scanResult[1];
+      cursor = next;
+      const realKeys = (keys || []).filter(
+        k => !k.startsWith('agent:apikey:') && k.split(':').length === 2
+      );
+      if (realKeys.length) {
+        const agents = await Promise.all(realKeys.map(k => upstash!.get<Agent>(k)));
+        for (const a of agents) if (a) out.push(a);
+      }
+      scanned += keys?.length || 0;
+      if (out.length >= limit) break;
+    } while (String(cursor) !== '0' && scanned < 5000);
+  } else if (store === 'ioredis' && ioredis) {
+    let cursor = '0';
+    let scanned = 0;
+    do {
+      const scanResult = await ioredis.scan(cursor, 'MATCH', 'agent:*', 'COUNT', 100);
+      cursor = scanResult[0];
+      const keys = scanResult[1];
+      const realKeys = keys.filter(
+        k => !k.startsWith('agent:apikey:') && k.split(':').length === 2
+      );
+      if (realKeys.length) {
+        const raws = await Promise.all(realKeys.map(k => ioredis!.get(k)));
+        for (const r of raws) if (r) out.push(JSON.parse(r));
+      }
+      scanned += keys.length;
+      if (out.length >= limit) break;
+    } while (cursor !== '0' && scanned < 5000);
+  } else {
+    for (const a of memoryAgents.values()) out.push(a);
+  }
+
+  out.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return out.slice(0, limit);
+}
+
 export async function updateAgentProfile(agentId: string, updates: Partial<Agent>) {
   const agent = await getAgentById(agentId);
   if (!agent) throw new Error('Agent not found');

@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAgentFromRequest } from '@/lib/auth';
 import { createPost } from '@/lib/store';
 
+// Use clawpump.tech directly. agents.clawpump.tech 308-redirects to it and the
+// redirect strips Authorization on cross-host hops.
 const CLAWPUMP_LAUNCH_URL = 'https://clawpump.tech/api/v1/launch';
+
+function normalizeAgentId(id: string) {
+  return id.startsWith('agent_') ? id : `agent_${id}`;
+}
 
 export async function POST(request: NextRequest) {
   const agent = await getAgentFromRequest(request);
@@ -22,6 +28,7 @@ export async function POST(request: NextRequest) {
   let launchStatus: 'announced_only' | 'launched_on_pumpfun' = 'announced_only';
 
   if (agent.clawpumpApiKey && agent.clawpumpAgentId) {
+    const clawpumpAgentId = normalizeAgentId(agent.clawpumpAgentId);
     try {
       const cpRes = await fetch(CLAWPUMP_LAUNCH_URL, {
         method: 'POST',
@@ -34,7 +41,7 @@ export async function POST(request: NextRequest) {
           symbol,
           description: description || `${name} — launched by ${agent.name} via Lumina.`,
           imageUrl: imageUrl || agent.avatarUrl || undefined,
-          agentId: agent.clawpumpAgentId,
+          agentId: clawpumpAgentId,
         }),
       });
       const text = await cpRes.text();
@@ -46,10 +53,25 @@ export async function POST(request: NextRequest) {
         pumpFunUrl = mintAddress ? `https://pump.fun/${mintAddress}` : undefined;
         launchStatus = 'launched_on_pumpfun';
       } else {
+        // Surface the real ClawPump error to the agent so they know what to fix.
+        const cpError = onChain?.error || `HTTP ${cpRes.status}`;
+        const hint =
+          cpRes.status === 403
+            ? "ClawPump returned 403. Likely your ClawPump agent doesn't have the 'token-launch' skill enabled or the wallet has no SOL. Open clawpump.tech, find this agent, enable the Token Launch skill and fund the wallet with at least 0.01 SOL, then retry."
+            : cpRes.status === 401
+              ? "ClawPump rejected the cpk_ key. Re-run POST /api/agents/connect-clawpump with a valid key."
+              : cpRes.status === 429
+                ? "ClawPump says rate limit exceeded. Wait for reset or upgrade tier."
+                : 'ClawPump rejected the launch. See clawpumpResponse for details.';
+
         return NextResponse.json({
-          error: 'ClawPump launch failed',
+          success: false,
+          launchStatus: 'rejected_by_clawpump',
           clawpumpStatus: cpRes.status,
+          clawpumpError: cpError,
           clawpumpResponse: onChain,
+          clawpumpAgentId,
+          hint,
         }, { status: 502 });
       }
     } catch (e: any) {
