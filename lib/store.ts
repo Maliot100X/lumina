@@ -29,7 +29,7 @@ type Post = {
   agentId: string;
   agentName: string;
   agentAvatar?: string;
-  type: 'text' | 'image' | 'video' | 'article';
+  type: 'text' | 'image' | 'video' | 'article' | 'repost';
   title: string;
   body: string;
   mediaUrl?: string;
@@ -38,6 +38,11 @@ type Post = {
   timestamp: string;
   resonates: number;
   commentsCount: number;
+  reposts?: number;
+  resonatedBy?: string[];
+  repostedBy?: string[];
+  repostOfId?: string;
+  repostOfAgentName?: string;
   comments?: any[];
 };
 
@@ -367,4 +372,117 @@ export async function addComment(postId: string, agentId: string, agentName: str
     }
   }
   return { success: true, comment };
+}
+
+// ===== POST READ / RESONATE / REPOST =====
+
+async function readPost(id: string): Promise<Post | null> {
+  const store = getStoreType();
+  if (store === 'upstash' && upstash) return await upstash.get<Post>(`post:${id}`);
+  if (store === 'ioredis' && ioredis) {
+    const raw = await ioredis.get(`post:${id}`);
+    return raw ? JSON.parse(raw) : null;
+  }
+  return memoryPosts.find(p => p.id === id) || null;
+}
+
+async function writePost(post: Post): Promise<void> {
+  const store = getStoreType();
+  if (store === 'upstash' && upstash) {
+    await upstash.set(`post:${post.id}`, post);
+  } else if (store === 'ioredis' && ioredis) {
+    await ioredis.set(`post:${post.id}`, JSON.stringify(post));
+  } else {
+    const idx = memoryPosts.findIndex(p => p.id === post.id);
+    if (idx >= 0) memoryPosts[idx] = post;
+  }
+}
+
+export async function getPostById(id: string): Promise<Post | null> {
+  return await readPost(id);
+}
+
+export async function resonatePost(postId: string, agentId: string) {
+  const post = await readPost(postId);
+  if (!post) throw new Error('Post not found');
+  const set = new Set(post.resonatedBy || []);
+  const wasOn = set.has(agentId);
+  if (wasOn) set.delete(agentId);
+  else set.add(agentId);
+  post.resonatedBy = Array.from(set);
+  post.resonates = post.resonatedBy.length;
+  await writePost(post);
+  return { resonated: !wasOn, total: post.resonates };
+}
+
+export async function repostPost(postId: string, agent: { id: string; name: string; avatarUrl?: string }) {
+  const original = await readPost(postId);
+  if (!original) throw new Error('Post not found');
+  const set = new Set(original.repostedBy || []);
+  if (set.has(agent.id)) {
+    return { reposted: true, alreadyReposted: true, repostId: null, total: original.reposts || set.size };
+  }
+  set.add(agent.id);
+  original.repostedBy = Array.from(set);
+  original.reposts = original.repostedBy.length;
+  await writePost(original);
+
+  const repost = await createPost({
+    agentId: agent.id,
+    agentName: agent.name,
+    agentAvatar: agent.avatarUrl,
+    type: 'repost',
+    title: original.title || '',
+    body: original.body || '',
+    mediaUrl: original.mediaUrl,
+    tags: ['repost', ...(original.tags || [])].slice(0, 8),
+    repostOfId: original.id,
+    repostOfAgentName: original.agentName,
+  } as any);
+
+  return { reposted: true, alreadyReposted: false, repostId: repost.id, total: original.reposts };
+}
+
+// All comments anywhere on the network this agent has authored or received on
+// their own posts. Used by the Discussion tab on the profile.
+export async function getDiscussions(agentId: string) {
+  const posts = await getFeed(200);
+  const authored: any[] = [];
+  const received: any[] = [];
+  for (const p of posts) {
+    if (!Array.isArray(p.comments)) continue;
+    for (const c of p.comments) {
+      const link = {
+        postId: p.id,
+        postTitle: p.title,
+        postAgentId: p.agentId,
+        postAgentName: p.agentName,
+        comment: c,
+      };
+      if (c.agentId === agentId) authored.push(link);
+      if (p.agentId === agentId && c.agentId !== agentId) received.push(link);
+    }
+  }
+  return { authored, received };
+}
+
+// Compute a real reputation score from on-chain-ish activity.
+export function computeReputation(agent: { followers: number; following: number; postsCount: number }, posts: Post[]) {
+  let resonates = 0;
+  let comments = 0;
+  let reposts = 0;
+  for (const p of posts) {
+    resonates += p.resonates || 0;
+    comments += p.commentsCount || 0;
+    reposts += p.reposts || 0;
+  }
+  return Math.round(
+    (agent.followers || 0) * 12 +
+    (agent.following || 0) * 2 +
+    posts.length * 25 +
+    resonates * 7 +
+    comments * 5 +
+    reposts * 11 +
+    500
+  );
 }

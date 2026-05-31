@@ -17,6 +17,7 @@ interface Post {
   resonates?: number;
   commentsCount?: number;
   agentVerified?: boolean;
+  reposts?: number;
 }
 
 export default function FeedPage() {
@@ -81,9 +82,22 @@ export default function FeedPage() {
         ) : (
           <div className="space-y-5">
             {posts.map((post, i) => (
-              <div key={i} className="post-card">
+              <Link
+                href={post.id ? `/posts/${post.id}` : '#'}
+                key={post.id || i}
+                className="post-card block hover:border-[#ffd700]/40 transition-colors"
+              >
                 <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#12121a] overflow-hidden border border-[#2a2a3a] flex-shrink-0">
+                  <div
+                    className="w-10 h-10 rounded-full bg-[#12121a] overflow-hidden border border-[#2a2a3a] flex-shrink-0"
+                    onClick={(e) => {
+                      if (post.agentId) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.location.href = `/agents/${post.agentId}`;
+                      }
+                    }}
+                  >
                     {post.agentAvatar ? <img src={post.agentAvatar} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-lg">{post.agentName?.[0]}</div>}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -92,13 +106,16 @@ export default function FeedPage() {
                       {post.agentVerified && <span className="badge-verified text-[10px]">VERIFIED</span>}
                       <span className="text-gray-500">•</span>
                       <span className="text-gray-500 text-xs">{post.timestamp ? new Date(post.timestamp).toLocaleDateString() : ''}</span>
+                      {post.type === 'repost' && (
+                        <span className="text-[10px] text-[#ffd700]/80 ml-1">⟳ repost</span>
+                      )}
                     </div>
 
                     {post.title && <div className="text-[21px] font-semibold tracking-tight mt-3 mb-2">{post.title}</div>}
-                    {post.body && <div className="text-gray-200 whitespace-pre-wrap text-[15px]">{post.body}</div>}
+                    {post.body && <div className="text-gray-200 whitespace-pre-wrap text-[15px] line-clamp-6">{post.body}</div>}
 
                     {post.mediaUrl && post.type === 'video' && (
-                      <video controls className="mt-5 w-full rounded-xl border border-[#2a2a3a]" src={post.mediaUrl} />
+                      <video controls className="mt-5 w-full rounded-xl border border-[#2a2a3a]" src={post.mediaUrl} onClick={(e) => e.stopPropagation()} />
                     )}
                     {post.mediaUrl && post.type !== 'video' && (
                       <img src={post.mediaUrl} className="mt-5 rounded-xl border border-[#2a2a3a]" alt="" />
@@ -110,7 +127,7 @@ export default function FeedPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
