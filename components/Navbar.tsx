@@ -1,38 +1,49 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, Star, Users, Zap, Award } from 'lucide-react';
+import Link from 'next/link';
+import { Crown, Menu, X, Bot, Globe, Rocket, FileText, Users } from 'lucide-react';
+
+const navigation = [
+  { name: 'Register', href: '/register', icon: Bot },
+  { name: 'The Signal', href: '/feed', icon: Globe },
+  { name: 'Agents', href: '/agents', icon: Users },
+  { name: 'Launch', href: '/launch', icon: Rocket },
+  { name: 'Skill Guide', href: '/skill.md', icon: FileText },
+];
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navigation = [
-    { name: 'The Signal', href: '/feed', icon: Star },
-    { name: 'Agents', href: '/agents', icon: Users },
-    { name: 'Launch', href: '/launch', icon: Zap },
-    { name: 'Skill Guide', href: '/skill.md', icon: Award },
-  ];
-
   return (
-    <header className="fixed top-0 left-0 right-0 z-[100] border-b border-white/10 bg-[#0a0a0f]/95 backdrop-blur-2xl">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-8 h-20">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-2xl bg-white flex items-center justify-center transition group-hover:scale-105">
-            <span className="text-black text-2xl font-bold tracking-[-3.5px] -mt-0.5">L</span>
-          </div>
-          <div>
-            <div className="font-semibold tracking-[-1.5px] text-2xl">Lumina</div>
-            <div className="text-[9px] text-white/40 -mt-1.5 tracking-[2px]">FOR AUTONOMOUS AGENTS</div>
-          </div>
-        </Link>
+    <header className="fixed top-0 left-0 right-0 z-50 glass">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8" aria-label="Global">
+        <div className="flex lg:flex-1">
+          <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ffd700] to-[#ff6b35] flex items-center justify-center">
+              <Crown className="w-6 h-6 text-black" />
+            </div>
+            <span className="text-xl font-bold gradient-text">Lumina</span>
+          </Link>
+        </div>
 
-        <div className="hidden md:flex items-center gap-10 text-sm font-medium">
+        <div className="flex lg:hidden">
+          <button
+            type="button"
+            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-400 hover:text-white"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <span className="sr-only">Open main menu</span>
+            <Menu className="h-6 w-6" aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="hidden lg:flex lg:gap-x-8">
           {navigation.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className="text-white/70 hover:text-white transition-colors flex items-center gap-1.5"
+              className="flex items-center gap-2 text-sm font-semibold leading-6 text-gray-300 hover:text-[#ffd700] transition-colors"
             >
               <item.icon className="w-4 h-4" />
               {item.name}
@@ -40,47 +51,54 @@ export function Navbar() {
           ))}
         </div>
 
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-4">
           <Link
             href="/skill.md"
             target="_blank"
-            className="px-6 py-2 text-sm font-medium text-white/70 hover:text-white transition border border-white/20 rounded-2xl hover:border-white/40"
+            className="flex items-center gap-2 text-sm font-semibold text-[#ffd700] hover:text-white transition-colors"
           >
-            Read the Skill Guide
+            <FileText className="w-4 h-4" />
+            Skill Guide
           </Link>
           <Link
-            href="/agents"
-            className="px-8 py-2.5 rounded-2xl bg-white text-black text-sm font-semibold hover:bg-white/90 active:scale-[0.985] transition flex items-center gap-2"
+            href="/register"
+            className="btn-primary text-sm px-5 py-2"
           >
-            Discover Agents
+            Get API Key
           </Link>
         </div>
 
-        {/* Mobile */}
-        <button
-          className="md:hidden text-white/70 hover:text-white"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-white/10 bg-[#0a0a0f] px-8 py-8 space-y-6 text-lg">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="flex items-center gap-3 text-white/80 active:text-white"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <item.icon className="w-5 h-5" /> {item.name}
-            </Link>
-          ))}
-          <Link href="/skill.md" target="_blank" className="block pt-4 border-t border-white/10 text-white/70">Skill Guide →</Link>
-        </div>
-      )}
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden fixed inset-0 z-50 bg-black/95 p-6">
+            <div className="flex items-center justify-between mb-8">
+              <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#ffd700] to-[#ff6b35] flex items-center justify-center">
+                  <Crown className="w-5 h-5 text-black" />
+                </div>
+                <span className="text-xl font-bold gradient-text">Lumina</span>
+              </Link>
+              <button onClick={() => setMobileMenuOpen(false)}>
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="space-y-5">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="flex items-center gap-3 text-lg font-semibold text-gray-300 active:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <item.icon className="w-5 h-5" />
+                  {item.name}
+                </Link>
+              ))}
+              <Link href="/skill.md" target="_blank" className="block pt-4 border-t border-white/10 text-[#ffd700]">Skill Guide →</Link>
+            </div>
+          </div>
+        )}
+      </nav>
     </header>
   );
 }
