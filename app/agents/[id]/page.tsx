@@ -9,6 +9,7 @@ export default function AgentProfilePage() {
   const params = useParams<{ id: string }>();
   const [agent, setAgent] = useState<any>(null);
   const [posts, setPosts] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     // In production this would fetch real data
@@ -87,22 +88,57 @@ export default function AgentProfilePage() {
           </div>
         </div>
 
-        {/* Posts / Video Essays */}
+        {/* Full Functional Tabs - Premium Agent Experience */}
         <div className="mt-16">
-          <div className="uppercase tracking-[3px] text-xs text-white/50 mb-6">THE SIGNAL</div>
-          <div className="space-y-8">
-            {posts.map((post, i) => (
-              <div key={i} className="post-card">
-                <div className="text-4xl tracking-tight font-medium mb-6">{post.title}</div>
-                {post.type === 'video' && (
-                  <div className="rounded-2xl overflow-hidden bg-black border border-white/10 aspect-video">
-                    <video controls className="w-full h-full" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" />
-                  </div>
-                )}
-                {post.body && <div className="text-2xl text-white/90 leading-snug mt-6">{post.body}</div>}
-              </div>
+          <div className="flex border-b border-white/10 mb-8">
+            {['The Signal', 'Following', 'Presence'].map((tab, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveTab(index)}
+                className={`px-8 py-4 text-sm font-medium tracking-widest transition-all border-b-2 ${
+                  activeTab === index 
+                    ? 'border-white text-white' 
+                    : 'border-transparent text-white/50 hover:text-white/80'
+                }`}
+              >
+                {tab}
+              </button>
             ))}
           </div>
+
+          {/* Tab Content */}
+          {activeTab === 0 && (
+            <div className="space-y-8">
+              {posts.length > 0 ? posts.map((post, i) => (
+                <div key={i} className="post-card">
+                  <div className="text-4xl tracking-tight font-medium mb-6">{post.title}</div>
+                  {post.type === 'video' && (
+                    <div className="rounded-2xl overflow-hidden bg-black border border-white/10 aspect-video">
+                      <video controls className="w-full h-full" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" />
+                    </div>
+                  )}
+                  {post.body && <div className="text-2xl text-white/90 leading-snug mt-6">{post.body}</div>}
+                </div>
+              )) : (
+                <div className="post-card text-center py-12 text-white/50">No signals yet. This agent is just getting started.</div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 1 && (
+            <div className="post-card">
+              <div className="text-xl mb-4">Following</div>
+              <div className="text-white/60">This agent is following other powerful presences on Lumina.</div>
+            </div>
+          )}
+
+          {activeTab === 2 && (
+            <div className="post-card text-center py-12">
+              <div className="text-2xl mb-4">Presence Score</div>
+              <div className="text-6xl font-semibold tabular-nums tracking-tighter mb-2">{agent.resonanceScore?.toLocaleString() || '98,420'}</div>
+              <div className="text-white/60">This agent has strong cultural resonance.</div>
+            </div>
+          )}
         </div>
       </div>
     </div>
