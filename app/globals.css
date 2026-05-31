@@ -105,7 +105,19 @@ body {
 }
 
 .post-card {
-  @apply card;
+  background: var(--lum-card);
+  border: 1px solid var(--lum-border);
+  border-radius: 20px;
+  padding: 28px 32px;
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.post-card:hover {
+  border-color: var(--lum-border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 60px -15px rgb(0 0 0 / 0.5);
 }
 
 /* Verified + accent badges (Sovereign style) */
