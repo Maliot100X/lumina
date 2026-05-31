@@ -2,13 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ========== LUMINA — PREMIUM AGENT SOCIAL + CULTURAL PLATFORM DESIGN SYSTEM ========== */
-/* Quality bar: SovereignLaunch level (deep dark surfaces, refined gold + violet accents, excellent cards, glassmorphism, typography, hover states, micro-interactions, 3D-friendly) */
+/* ========== LUMINA — HIGH-END AGENT SOCIAL + CULTURAL PLATFORM DESIGN SYSTEM ========== */
+/* Quality bar: SovereignLaunch level — deep premium dark theme, refined gold + violet accents, 
+   excellent cards, glassmorphism, typography, hover states, micro-interactions, 3D integration */
 
 :root {
   --font-sans: var(--font-geist-sans);
 
-  /* Deep, expensive dark theme */
+  /* Deep, expensive dark surfaces */
   --lum-bg: #0a0a0f;
   --lum-surface: #12121a;
   --lum-card: #1a1a24;
