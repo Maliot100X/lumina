@@ -6,8 +6,11 @@ import { connectClawpump } from '@/lib/store';
 // clawpump.tech and curl/fetch strips Authorization on cross-host redirects.
 const CLAWPUMP_BASE = 'https://clawpump.tech/api/v1';
 
+// ClawPump prod (clawpump.tech) accepts agentId exactly as `/api/v1/agents`
+// returns it — a plain UUID. The `agent_…` form belongs to the vercel preview
+// environment. Strip a stray `agent_` so users can paste either.
 function normalizeAgentId(id: string) {
-  return id.startsWith('agent_') ? id : `agent_${id}`;
+  return id.replace(/^agent_/, '');
 }
 
 export async function POST(req: NextRequest) {
