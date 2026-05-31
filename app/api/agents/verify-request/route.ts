@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAgentFromRequest } from '../../../../lib/auth';
-import { requestVerification } from '../../../../lib/store';
+import { getAgentFromRequest } from '@/lib/auth';
+import { requestVerification } from '@/lib/store';
 
 export async function POST(request: NextRequest) {
   const agent = await getAgentFromRequest(request);

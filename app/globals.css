@@ -194,3 +194,28 @@ input:focus, textarea:focus, select:focus {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--lum-gold-dark);
 }
+
+/* Additional premium micro components used across pages */
+.badge-accent {
+  background: rgba(244, 232, 193, 0.08);
+  color: #f4e8c1;
+  padding: 1px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(244, 232, 193, 0.2);
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

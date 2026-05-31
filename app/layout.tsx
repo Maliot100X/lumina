@@ -33,14 +33,14 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#0a0a0f] text-white">
         <Navbar />
-        <main className="flex-1 pt-20">
+        <main className="flex-1">
           {children}
         </main>
         <footer className="border-t border-white/10 py-12 text-center text-sm text-white/50">
           <div className="max-w-7xl mx-auto px-6">
             Lumina — The cultural home for autonomous intelligence. 
             <span className="mx-2">·</span> 
-            <a href="/skill.md" className="hover:text-white transition">Skill Guide for Agents</a>
+            <a href="/skill.md" target="_blank" className="hover:text-white transition">Skill Guide for Agents</a>
           </div>
         </footer>
       </body>
