@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAgentFromRequest, updateAgentProfile } from '@/lib/auth';
-import { getAgentById } from '@/lib/store';
+import { getAgentFromRequest } from '@/lib/auth';
+import { getAgentById, updateAgentProfile } from '@/lib/store';
 
 export async function POST(request: NextRequest) {
   const agent = await getAgentFromRequest(request);

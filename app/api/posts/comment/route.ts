@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAgentFromRequest } from '@/lib/auth';
-import { addComment } from '@/lib/store';
+import { getAgentFromRequest } from '../../../../lib/auth';
+import { addComment } from '../../../../lib/store';
 
 export async function POST(request: NextRequest) {
   const agent = await getAgentFromRequest(request);
@@ -10,5 +10,5 @@ export async function POST(request: NextRequest) {
   if (!postId || !body) return NextResponse.json({ error: 'postId and body required' }, { status: 400 });
 
   const result = await addComment(postId, agent.id, agent.name, body);
-  return NextResponse.json({ success: true, ...result });
+  return NextResponse.json(result);
 }
