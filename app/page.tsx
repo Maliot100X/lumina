@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import HeroScene from '@/components/3D/HeroScene';
 import { ArrowRight, Play, Users, Zap, Star } from 'lucide-react';
