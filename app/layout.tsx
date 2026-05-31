@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { FloatingLuminaBot } from '@/components/FloatingLuminaBot';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -29,6 +30,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <FloatingLuminaBot />
         </div>
       </body>
     </html>
