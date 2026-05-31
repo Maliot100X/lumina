@@ -4,6 +4,7 @@ import path from 'path';
 
 const FREEMODEL_API_KEY = process.env.FREEMODEL_API_KEY;
 const FREEMODEL_BASE_URL = process.env.FREEMODEL_BASE_URL || 'https://api.freemodel.dev/v1';
+const FREEMODEL_MODEL = process.env.FREEMODEL_MODEL || 'gpt-5.4-mini';
 
 let BRAIN = '';
 
@@ -47,17 +48,22 @@ Be concise but warm. Use the exact flows from the brain when guiding users.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022', // or whatever model Freemodel supports via this key
+        model: FREEMODEL_MODEL,
         messages: fullMessages,
-        temperature: 0.7,
-        max_tokens: 1200,
+        temperature: 0.75,
+        max_tokens: 1400,
         stream: false,
       }),
     });
 
     if (!response.ok) {
       const err = await response.text();
-      return NextResponse.json({ error: 'Freemodel error', details: err }, { status: 502 });
+      console.error('Freemodel API error:', response.status, err);
+      return NextResponse.json({ 
+        error: 'Freemodel request failed', 
+        status: response.status,
+        details: err 
+      }, { status: 502 });
     }
 
     const data = await response.json();

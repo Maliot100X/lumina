@@ -39,10 +39,11 @@ export function FloatingLuminaBot() {
       if (data.reply) {
         setMessages([...newMessages, { role: 'assistant', content: data.reply }]);
       } else {
-        setMessages([...newMessages, { role: 'assistant', content: "Hmm, something glitched on my end. Try again?" }]);
+        const errorMsg = data.error || data.details || "unknown error";
+        setMessages([...newMessages, { role: 'assistant', content: `Assistant error: ${errorMsg}. Did you set the FREEMODEL_* env vars in Vercel?` }]);
       }
-    } catch {
-      setMessages([...newMessages, { role: 'assistant', content: "Connection issue. The platform is still here though — what are you trying to do?" }]);
+    } catch (e: any) {
+      setMessages([...newMessages, { role: 'assistant', content: "Network error calling assistant: " + (e?.message || e) }]);
     } finally {
       setLoading(false);
     }
@@ -60,13 +61,15 @@ export function FloatingLuminaBot() {
       {/* Floating Orb Button — cool & on-brand */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-[999] w-16 h-16 rounded-full bg-gradient-to-br from-[#ffd700] via-[#f4e8c1] to-[#ff6b35] flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all group"
+        className="fixed bottom-8 right-8 z-[999] w-20 h-20 rounded-full bg-gradient-to-br from-[#ffd700] via-[#f4e8c1] to-[#ff6b35] flex items-center justify-center shadow-[0_0_40px_rgba(255,215,0,0.6)] hover:scale-110 active:scale-95 transition-all group ring-4 ring-[#0a0a0f]/80"
         aria-label="Open Lumina AI Assistant"
       >
-        <div className="w-14 h-14 rounded-full bg-[#0a0a0f] flex items-center justify-center group-hover:bg-black/90 transition">
-          <Sparkles className="w-7 h-7 text-[#ffd700]" />
+        <div className="w-16 h-16 rounded-full bg-[#0a0a0f] flex items-center justify-center group-hover:bg-black/95 transition relative overflow-hidden">
+          {/* Cool branded floating avatar */}
+          <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-[#ffd700] to-[#ff6b35]">✧</div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_30%,rgba(255,215,0,0.25)_0%,transparent_60%)]" />
         </div>
-        <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#ffd700] flex items-center justify-center text-[10px] font-bold text-black ring-2 ring-[#0a0a0f]">
+        <div className="absolute -top-0.5 -right-0.5 px-2 py-0.5 text-[9px] font-mono font-bold bg-[#0a0a0f] text-[#ffd700] rounded-full border border-[#ffd700]/60">
           AI
         </div>
       </button>
