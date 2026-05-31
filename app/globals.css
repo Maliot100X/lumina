@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ========== LUMINA — PREMIUM AGENT SOCIAL PLATFORM DESIGN SYSTEM ========== */
-/* Built to the same high quality standard as SovereignLaunch (deep dark surfaces, elegant gold + violet accents, excellent cards, glassmorphism, typography, hover states, and 3D integration) */
+/* ========== LUMINA — PREMIUM AGENT SOCIAL + CULTURAL PLATFORM DESIGN SYSTEM ========== */
+/* Quality bar: SovereignLaunch level (deep dark surfaces, refined gold + violet accents, excellent cards, glassmorphism, typography, hover states, micro-interactions, 3D-friendly) */
 
 :root {
   --font-sans: var(--font-geist-sans);
@@ -15,7 +15,7 @@
   --lum-border: #2a2a3a;
   --lum-border-hover: #3f3f52;
 
-  /* Signature Lumina accents */
+  /* Signature Lumina palette — elegant violet + refined gold */
   --lum-violet: #c4b5fd;
   --lum-violet-dark: #8b7ed8;
   --lum-gold: #f4e8c1;
@@ -35,22 +35,20 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* High-end Glassmorphism */
+/* Premium Glassmorphism */
 .glass {
   background: rgba(26, 26, 36, 0.82);
   backdrop-filter: blur(24px);
   border: 1px solid var(--lum-border);
 }
 
-/* Premium Card System (the foundation of good UI) */
+/* High-End Card System (SovereignLaunch quality) */
 .card, .post-card {
   background: var(--lum-card);
   border: 1px solid var(--lum-border);
-  border-radius: 20px;
-  padding: 28px 32px;
-  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1),
-              border-color 0.2s ease,
-              box-shadow 0.2s ease;
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.2s ease;
 }
 
 .card:hover, .post-card:hover {
@@ -59,7 +57,7 @@ html, body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-/* Verified Badge (gold, prominent, expensive feeling) */
+/* Verified Badge (gold, prominent, expensive) */
 .badge-verified {
   background: rgba(234, 179, 8, 0.1);
   color: #fde047;
@@ -71,7 +69,7 @@ html, body {
   letter-spacing: 0.6px;
 }
 
-/* High-Quality Form Controls */
+/* Premium Form Inputs */
 input, textarea, select {
   background: var(--lum-surface);
   border: 1px solid var(--lum-border);
@@ -89,7 +87,7 @@ input:focus, textarea:focus, select:focus {
   background: #0f0f13;
 }
 
-/* Premium Button System */
+/* High-Quality Button System */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -136,7 +134,7 @@ input:focus, textarea:focus, select:focus {
   background: rgba(244, 232, 193, 0.08);
 }
 
-/* Full Functional, High-End Tab System */
+/* Full Functional, Beautiful Tab System */
 .tab-button {
   padding: 14px 32px;
   font-size: 14px;
@@ -157,7 +155,7 @@ input:focus, textarea:focus, select:focus {
   color: var(--lum-text);
 }
 
-/* Better 3D Orb Integration */
+/* 3D Presence Orb Polish */
 .presence-orb-container {
   transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -166,10 +164,32 @@ input:focus, textarea:focus, select:focus {
   transform: scale(1.015);
 }
 
-/* Typography & Section Polish */
+/* Typography Polish */
 .section-title {
   font-size: 42px;
   line-height: 1.05;
   letter-spacing: -2.2px;
   font-weight: 600;
+}
+
+.card-title {
+  font-size: 22px;
+  letter-spacing: -0.6px;
+  font-weight: 600;
+}
+
+/* Custom Scrollbar (SovereignLaunch style) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--lum-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--lum-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--lum-gold-dark);
 }
