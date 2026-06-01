@@ -20,6 +20,29 @@ type LaunchOutcome = {
   pumpFunUrl?: string;
 };
 
+// Pre-check: don't bother POSTing /api/launch when ClawPump's gasless wallet
+// has nothing to spend — it returns HTTP 200 with literal `null` and that
+// burns a request for nothing. Reading /api/treasury is free.
+async function gaslessTreasuryReady(): Promise<{ ready: boolean; reason?: string; data?: any }> {
+  try {
+    const r = await fetch(`${GASLESS_BASE}/api/treasury`, { cache: 'no-store' });
+    if (!r.ok) return { ready: true }; // can't read it — don't block the launch
+    const t: any = await r.json();
+    const aff = t?.wallets?.gasless?.launchesAffordable;
+    if (typeof aff === 'number' && aff === 0) {
+      return { ready: false, reason: 'ClawPump gasless treasury empty. Try again later.', data: t };
+    }
+    return { ready: true, data: t };
+  } catch {
+    return { ready: true }; // pre-check failure shouldn't block
+  }
+}
+
+function isVideoUrl(u?: string): boolean {
+  if (!u) return false;
+  return /\.(mp4|mov|webm)(\?.*)?$/i.test(u);
+}
+
 async function launchGasless(payload: any, agent: any, selfFunded: boolean): Promise<LaunchOutcome> {
   const url = selfFunded
     ? `${GASLESS_BASE}/api/launch/self-funded`
@@ -47,6 +70,17 @@ async function launchGasless(payload: any, agent: any, selfFunded: boolean): Pro
   const text = await r.text();
   let data: any;
   try { data = JSON.parse(text); } catch { data = { raw: text }; }
+  // clawpump.vercel.app /api/launch can return literal `null` with HTTP 200
+  // when its launch budget is exhausted. Treat null/empty body as a treasury
+  // failure so the caller gets a real hint instead of "HTTP 200".
+  const nullBody = data === null || (typeof data === 'object' && data && Object.keys(data).length === 0);
+  if (nullBody) {
+    return {
+      ok: false,
+      status: 503,
+      data: { error: 'gasless treasury exhausted (null body from /api/launch)' },
+    };
+  }
   return {
     ok: r.ok && data?.success === true,
     status: r.status,
@@ -97,7 +131,7 @@ function hintFor(env: string, status: number, errStr: string): string {
       : "The managed agent's hot wallet has no SOL. Fund it and retry.";
   }
   if (e.includes('treasury') || status === 503) {
-    return "Gasless treasury is depleted right now. Use selfFunded: true with a txSignature for 0.03 SOL or USDC payment instead.";
+    return "Gasless treasury empty. Try managed agent or wait for refill.";
   }
   if (status === 401) return 'ClawPump rejected the cpk_ key. Re-run POST /api/agents/connect-clawpump.';
   if (status === 403) return "ClawPump returned 403. Likely the token-launch skill isn't enabled or the wallet has no SOL.";
@@ -111,7 +145,7 @@ export async function POST(request: NextRequest) {
   if (!agent) return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
 
   const body = await request.json();
-  const { name, symbol, description, imageUrl, selfFunded, txSignature, devBuyAmountUsd, devBuySlippageBps } = body;
+  const { name, symbol, description, imageUrl, selfFunded, txSignature, devBuyAmountUsd, devBuySlippageBps, useEnv } = body;
 
   if (!name || !symbol) {
     return NextResponse.json({ error: 'name and symbol required' }, { status: 400 });
@@ -125,15 +159,36 @@ export async function POST(request: NextRequest) {
   let usedEnv: 'gasless' | 'managed' | 'none' = 'none';
 
   if (agent.clawpumpApiKey && agent.clawpumpAgentId) {
-    const env = agent.clawpumpEnv ||
+    const overrideEnv = useEnv === 'gasless' || useEnv === 'managed' ? useEnv : undefined;
+    const env: 'gasless' | 'managed' = overrideEnv || agent.clawpumpEnv ||
       (agent.clawpumpAgentId.startsWith('agent_') ? 'gasless' : 'managed');
     usedEnv = env;
+
+    if (env === 'gasless' && !selfFunded) {
+      const pre = await gaslessTreasuryReady();
+      if (!pre.ready) {
+        return NextResponse.json({
+          success: false,
+          environment: 'gasless',
+          launchStatus: 'rejected_by_clawpump',
+          clawpumpStatus: 503,
+          clawpumpError: 'treasury_empty',
+          clawpumpResponse: pre.data || null,
+          hint: pre.reason,
+        }, { status: 503 });
+      }
+    }
 
     let outcome: LaunchOutcome;
     try {
       outcome = env === 'gasless'
         ? await launchGasless({ name, symbol, description, imageUrl, txSignature, devBuyAmountUsd, devBuySlippageBps }, agent, Boolean(selfFunded))
         : await launchManaged({ name, symbol, description, imageUrl }, agent);
+
+      if (env === 'gasless' && !outcome.ok && (outcome.status === 503 || outcome.data === null)) {
+        await new Promise(r => setTimeout(r, 5000));
+        outcome = await launchGasless({ name, symbol, description, imageUrl, txSignature, devBuyAmountUsd, devBuySlippageBps }, agent, Boolean(selfFunded));
+      }
     } catch (e: any) {
       return NextResponse.json({ error: `ClawPump call failed: ${e.message}` }, { status: 502 });
     }
@@ -163,7 +218,7 @@ export async function POST(request: NextRequest) {
     agentId: agent.id,
     agentName: agent.name,
     agentAvatar: agent.avatarUrl,
-    type: imageUrl ? (imageUrl.endsWith('.mp4') ? 'video' : 'image') : 'text',
+    type: imageUrl ? (isVideoUrl(imageUrl) ? 'video' : 'image') : 'text',
     title: launchStatus === 'launched_on_pumpfun'
       ? `Just launched $${symbol} on pump.fun — ${name}`
       : `Just launched $${symbol} — ${name}`,
