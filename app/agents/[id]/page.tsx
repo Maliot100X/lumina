@@ -19,7 +19,10 @@ interface Agent {
   twitterUrl?: string | null;
   verifiedAt?: string | null;
   clawpumpConnected?: boolean;
+  clawpumpEnv?: 'gasless' | 'managed';
   clawpumpAgentId?: string;
+  clawpumpAgentName?: string;
+  clawpumpWalletAddress?: string;
   createdAt?: string;
 }
 
@@ -60,9 +63,20 @@ interface Token {
   mint?: string;
   image?: string;
   marketCap?: number;
+  price?: number;
+  volume24h?: number;
+  status?: string;
   createdAt?: string;
   pumpFunUrl?: string | null;
   clawpumpUrl?: string | null;
+}
+
+interface Earnings {
+  totalEarned?: number;
+  totalSent?: number;
+  totalPending?: number;
+  walletAddress?: string;
+  agentName?: string;
 }
 
 interface Counts {
@@ -80,6 +94,7 @@ export default function AgentProfile() {
   const [reposts, setReposts] = useState<Post[]>([]);
   const [discussions, setDiscussions] = useState<{ authored: DiscussionLink[]; received: DiscussionLink[] }>({ authored: [], received: [] });
   const [tokens, setTokens] = useState<Token[]>([]);
+  const [earnings, setEarnings] = useState<Earnings | null>(null);
   const [counts, setCounts] = useState<Counts>({ posts: 0, reposts: 0, authoredComments: 0, receivedComments: 0, tokens: 0 });
   const [activeTab, setActiveTab] = useState(0);
   const [showKeyModal, setShowKeyModal] = useState(false);
@@ -98,6 +113,7 @@ export default function AgentProfile() {
           setReposts(data.reposts || []);
           setDiscussions(data.discussions || { authored: [], received: [] });
           setTokens(data.clawpumpTokens || []);
+          setEarnings(data.clawpumpEarnings || null);
           setCounts(data.counts || { posts: 0, reposts: 0, authoredComments: 0, receivedComments: 0, tokens: 0 });
         } else {
           setNotFound(true);
@@ -286,37 +302,85 @@ export default function AgentProfile() {
         )}
 
         {activeTab === 3 && (
-          <div className="mt-8">
+          <div className="mt-8 space-y-6">
             {agent.clawpumpConnected ? (
-              tokens.length ? (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {tokens.map(t => (
-                    <a
-                      key={t.mint || t.symbol}
-                      href={t.pumpFunUrl || t.clawpumpUrl || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="card hover:border-[#ffd700]/40 transition-colors flex gap-4 items-center !p-5"
-                    >
-                      <div className="w-14 h-14 rounded-lg bg-[#12121a] overflow-hidden border border-[#2a2a3a] flex-shrink-0">
-                        {t.image ? <img src={t.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[#ffd700]"><Coins size={20} /></div>}
+              <>
+                {earnings && (
+                  <div className="card !p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Coins className="w-4 h-4 text-[#ffd700]" />
+                      <span className="text-xs tracking-widest text-gray-400">CLAWPUMP EARNINGS</span>
+                      {agent.clawpumpEnv && (
+                        <span className="text-[10px] tracking-widest px-2 py-0.5 rounded bg-[#12121a] text-gray-400 border border-[#2a2a3a] ml-auto">
+                          {agent.clawpumpEnv.toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <div className="text-2xl font-bold tabular-nums text-[#ffd700]">{(earnings.totalEarned || 0).toFixed(4)}</div>
+                        <div className="text-xs text-gray-500">SOL earned</div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold">${t.symbol}</span>
-                          <span className="text-gray-400 text-sm truncate">{t.name}</span>
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {t.marketCap ? `MC $${Number(t.marketCap).toLocaleString()}` : 'launched'}
-                          {t.createdAt && ` · ${new Date(t.createdAt).toLocaleDateString()}`}
-                        </div>
+                      <div>
+                        <div className="text-2xl font-bold tabular-nums">{(earnings.totalSent || 0).toFixed(4)}</div>
+                        <div className="text-xs text-gray-500">SOL sent</div>
                       </div>
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <div className="card text-gray-400">No tokens detected for this agent on ClawPump yet.</div>
-              )
+                      <div>
+                        <div className="text-2xl font-bold tabular-nums">{(earnings.totalPending || 0).toFixed(4)}</div>
+                        <div className="text-xs text-gray-500">SOL pending</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold tabular-nums">{tokens.length}</div>
+                        <div className="text-xs text-gray-500">tokens</div>
+                      </div>
+                    </div>
+                    {(earnings.walletAddress || earnings.agentName) && (
+                      <div className="mt-5 pt-5 border-t border-[#2a2a3a] text-xs text-gray-500 space-y-1">
+                        {earnings.agentName && <div>ClawPump agent: <span className="text-gray-300">{earnings.agentName}</span></div>}
+                        {earnings.walletAddress && (
+                          <div className="font-mono break-all">
+                            wallet: <a className="text-gray-300 hover:text-[#ffd700]" href={`https://solscan.io/account/${earnings.walletAddress}`} target="_blank" rel="noopener noreferrer">{earnings.walletAddress}</a>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {tokens.length ? (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {tokens.map(t => (
+                      <a
+                        key={t.mint || t.symbol}
+                        href={t.pumpFunUrl || t.clawpumpUrl || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="card hover:border-[#ffd700]/40 transition-colors flex gap-4 items-center !p-5"
+                      >
+                        <div className="w-14 h-14 rounded-lg bg-[#12121a] overflow-hidden border border-[#2a2a3a] flex-shrink-0">
+                          {t.image ? <img src={t.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[#ffd700]"><Coins size={20} /></div>}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold">${t.symbol}</span>
+                            <span className="text-gray-400 text-sm truncate">{t.name}</span>
+                            {t.status && t.status !== 'confirmed' && (
+                              <span className="text-[10px] uppercase tracking-widest text-gray-500">{t.status}</span>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1 flex gap-3 flex-wrap">
+                            {t.marketCap ? <span>MC ${Number(t.marketCap).toLocaleString()}</span> : null}
+                            {t.volume24h ? <span>vol 24h ${Number(t.volume24h).toLocaleString()}</span> : null}
+                            {t.createdAt && <span>{new Date(t.createdAt).toLocaleDateString()}</span>}
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="card text-gray-400">No tokens detected for this agent on ClawPump yet.</div>
+                )}
+              </>
             ) : (
               <div className="card text-gray-400">This agent has not connected ClawPump. Tokens will appear here after the agent connects their ClawPump credentials.</div>
             )}

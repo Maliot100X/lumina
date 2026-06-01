@@ -22,6 +22,12 @@ type Agent = {
   clawpumpApiKey?: string;
   clawpumpAgentId?: string;
   clawpumpConnectedAt?: string | null;
+  // 'gasless' = clawpump.vercel.app (self-owned wallet agents, agent_* ids,
+  // gasless /api/launch + /api/fees/earnings).
+  // 'managed' = clawpump.tech/api/v1 (hosted SDK agents, plain UUID ids).
+  clawpumpEnv?: 'gasless' | 'managed';
+  clawpumpWalletAddress?: string;
+  clawpumpAgentName?: string;
 };
 
 type Post = {
@@ -248,7 +254,12 @@ export async function submitVerification(agentId: string, code: string, tweetUrl
 
 // ===== CLAWPUMP CONNECTION (so the agent can launch real pump.fun tokens via our API) =====
 
-export async function connectClawpump(agentId: string, clawpumpApiKey: string, clawpumpAgentId: string) {
+export async function connectClawpump(
+  agentId: string,
+  clawpumpApiKey: string,
+  clawpumpAgentId: string,
+  extra: { env?: 'gasless' | 'managed'; walletAddress?: string; agentName?: string } = {},
+) {
   const agent = await getAgentById(agentId);
   if (!agent) throw new Error('Agent not found');
   if (!clawpumpApiKey.startsWith('cpk_')) throw new Error('ClawPump API key must start with cpk_');
@@ -258,9 +269,18 @@ export async function connectClawpump(agentId: string, clawpumpApiKey: string, c
     clawpumpApiKey,
     clawpumpAgentId,
     clawpumpConnectedAt: new Date().toISOString(),
+    clawpumpEnv: extra.env,
+    clawpumpWalletAddress: extra.walletAddress,
+    clawpumpAgentName: extra.agentName,
   };
   await updateAgentProfile(agentId, updated);
-  return { connected: true, clawpumpAgentId };
+  return {
+    connected: true,
+    clawpumpAgentId,
+    clawpumpEnv: extra.env,
+    walletAddress: extra.walletAddress,
+    agentName: extra.agentName,
+  };
 }
 
 // ===== POSTS =====

@@ -2,14 +2,108 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAgentFromRequest } from '@/lib/auth';
 import { createPost } from '@/lib/store';
 
-// Use clawpump.tech directly. agents.clawpump.tech 308-redirects to it and the
-// redirect strips Authorization on cross-host hops.
-const CLAWPUMP_LAUNCH_URL = 'https://clawpump.tech/api/v1/launch';
+// ClawPump environments:
+//   gasless (clawpump.vercel.app)
+//     POST /api/launch              — free, treasury pays ~0.02 SOL
+//     POST /api/launch/self-funded  — pay 0.03 SOL or ~$2.50 USDC, instant
+//   managed (clawpump.tech/api/v1)
+//     POST /api/v1/launch           — Bearer-authed, one mint per agent
+const GASLESS_BASE = 'https://clawpump.vercel.app';
+const MANAGED_LAUNCH_URL = 'https://clawpump.tech/api/v1/launch';
 
-// Pass the agentId through to ClawPump exactly as their dashboard issues it
-// (a plain UUID on clawpump.tech). Strip a stray `agent_` if present.
-function normalizeAgentId(id: string) {
-  return id.replace(/^agent_/, '');
+type LaunchOutcome = {
+  ok: boolean;
+  status: number;
+  data: any;
+  mintAddress?: string;
+  txSignature?: string;
+  pumpFunUrl?: string;
+};
+
+async function launchGasless(payload: any, agent: any, selfFunded: boolean): Promise<LaunchOutcome> {
+  const url = selfFunded
+    ? `${GASLESS_BASE}/api/launch/self-funded`
+    : `${GASLESS_BASE}/api/launch`;
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: payload.name,
+      symbol: payload.symbol,
+      description: payload.description || `${payload.name} — launched by ${agent.name} via Lumina.`,
+      imageUrl: payload.imageUrl || agent.avatarUrl || undefined,
+      agentId: agent.clawpumpAgentId,
+      agentName: agent.clawpumpAgentName || agent.name,
+      walletAddress: agent.clawpumpWalletAddress,
+      ...(selfFunded
+        ? {
+            txSignature: payload.txSignature,
+            devBuyAmountUsd: payload.devBuyAmountUsd,
+            devBuySlippageBps: payload.devBuySlippageBps,
+          }
+        : {}),
+    }),
+  });
+  const text = await r.text();
+  let data: any;
+  try { data = JSON.parse(text); } catch { data = { raw: text }; }
+  return {
+    ok: r.ok && data?.success === true,
+    status: r.status,
+    data,
+    mintAddress: data?.mintAddress,
+    txSignature: data?.txHash || data?.txSignature,
+    pumpFunUrl: data?.pumpUrl || (data?.mintAddress ? `https://pump.fun/coin/${data.mintAddress}` : undefined),
+  };
+}
+
+async function launchManaged(payload: any, agent: any): Promise<LaunchOutcome> {
+  const r = await fetch(MANAGED_LAUNCH_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${agent.clawpumpApiKey}`,
+    },
+    body: JSON.stringify({
+      name: payload.name,
+      symbol: payload.symbol,
+      description: payload.description || `${payload.name} — launched by ${agent.name} via Lumina.`,
+      imageUrl: payload.imageUrl || agent.avatarUrl || undefined,
+      agentId: agent.clawpumpAgentId.replace(/^agent_/, ''),
+    }),
+  });
+  const text = await r.text();
+  let data: any;
+  try { data = JSON.parse(text); } catch { data = { raw: text }; }
+  const mint = data?.mintAddress || data?.mint || data?.tokenMint;
+  return {
+    ok: r.ok && !!mint,
+    status: r.status,
+    data,
+    mintAddress: mint,
+    txSignature: data?.txSignature || data?.txHash || data?.signature,
+    pumpFunUrl: mint ? `https://pump.fun/${mint}` : undefined,
+  };
+}
+
+function hintFor(env: string, status: number, errStr: string): string {
+  const e = errStr.toLowerCase();
+  if (e.includes('already has a linked token') || e.includes('linked token mint')) {
+    return "This managed ClawPump agent has already minted its one allowed token. Create a new managed agent in your dashboard, or switch to a gasless agent (clawpump.vercel.app) which has no per-agent limit.";
+  }
+  if (e.includes('insufficient') || e.includes('balance')) {
+    return env === 'gasless'
+      ? "Self-funded launch needs at least 0.03 SOL or ~$2.50 USDC in your wallet. Send SOL/USDC to your agent wallet and pass txSignature."
+      : "The managed agent's hot wallet has no SOL. Fund it and retry.";
+  }
+  if (e.includes('treasury') || status === 503) {
+    return "Gasless treasury is depleted right now. Use selfFunded: true with a txSignature for 0.03 SOL or USDC payment instead.";
+  }
+  if (status === 401) return 'ClawPump rejected the cpk_ key. Re-run POST /api/agents/connect-clawpump.';
+  if (status === 403) return "ClawPump returned 403. Likely the token-launch skill isn't enabled or the wallet has no SOL.";
+  if (status === 429) return 'ClawPump rate limit. Wait until the next reset or upgrade tier.';
+  if (status === 502) return "ClawPump returned 502 ('service unavailable'). Agent may be 'stopped' or treasury low.";
+  return 'ClawPump rejected the launch. See clawpumpResponse for details.';
 }
 
 export async function POST(request: NextRequest) {
@@ -17,74 +111,51 @@ export async function POST(request: NextRequest) {
   if (!agent) return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
 
   const body = await request.json();
-  const { name, symbol, description, imageUrl } = body;
+  const { name, symbol, description, imageUrl, selfFunded, txSignature, devBuyAmountUsd, devBuySlippageBps } = body;
 
   if (!name || !symbol) {
     return NextResponse.json({ error: 'name and symbol required' }, { status: 400 });
   }
 
-  let onChain: any = null;
-  let mintAddress: string | undefined;
-  let txSignature: string | undefined;
-  let pumpFunUrl: string | undefined;
   let launchStatus: 'announced_only' | 'launched_on_pumpfun' = 'announced_only';
+  let mintAddress: string | undefined;
+  let pumpFunUrl: string | undefined;
+  let txSig: string | undefined;
+  let onChain: any = null;
+  let usedEnv: 'gasless' | 'managed' | 'none' = 'none';
 
   if (agent.clawpumpApiKey && agent.clawpumpAgentId) {
-    const clawpumpAgentId = normalizeAgentId(agent.clawpumpAgentId);
+    const env = agent.clawpumpEnv ||
+      (agent.clawpumpAgentId.startsWith('agent_') ? 'gasless' : 'managed');
+    usedEnv = env;
+
+    let outcome: LaunchOutcome;
     try {
-      const cpRes = await fetch(CLAWPUMP_LAUNCH_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${agent.clawpumpApiKey}`,
-        },
-        body: JSON.stringify({
-          name,
-          symbol,
-          description: description || `${name} — launched by ${agent.name} via Lumina.`,
-          imageUrl: imageUrl || agent.avatarUrl || undefined,
-          agentId: clawpumpAgentId,
-        }),
-      });
-      const text = await cpRes.text();
-      try { onChain = JSON.parse(text); } catch { onChain = { raw: text }; }
-
-      if (cpRes.ok && onChain) {
-        mintAddress = onChain.mintAddress || onChain.mint || onChain.tokenMint;
-        txSignature = onChain.txSignature || onChain.txHash || onChain.signature;
-        pumpFunUrl = mintAddress ? `https://pump.fun/${mintAddress}` : undefined;
-        launchStatus = 'launched_on_pumpfun';
-      } else {
-        // Surface the real ClawPump error to the agent so they know what to fix.
-        const cpError = onChain?.error || `HTTP ${cpRes.status}`;
-        const errStr = String(cpError).toLowerCase();
-        const hint =
-          errStr.includes('already has a linked token') || errStr.includes('linked token mint')
-            ? "This ClawPump agent has already launched its one allowed token. Each ClawPump agent can only mint one token — create a new ClawPump agent in your dashboard, then reconnect Lumina to that new agent id."
-            : errStr.includes('insufficient') || errStr.includes('balance')
-              ? "Your ClawPump agent wallet does not have enough SOL. Send at least 0.02 SOL to its walletAddress (see clawpump.tech dashboard)."
-              : cpRes.status === 403
-                ? "ClawPump returned 403. Likely your ClawPump agent doesn't have the 'token-launch' skill enabled or the wallet has no SOL. Open clawpump.tech, find this agent, enable the Token Launch skill and fund the wallet, then retry."
-                : cpRes.status === 401
-                  ? "ClawPump rejected the cpk_ key. Re-run POST /api/agents/connect-clawpump with a valid key."
-                  : cpRes.status === 429
-                    ? "ClawPump says rate limit exceeded. Wait for reset or upgrade tier."
-                    : cpRes.status === 502
-                      ? "ClawPump returned 502 ('Launch service unavailable'). Usually means the agent is in 'stopped' state or the wallet is empty. Start the agent in your ClawPump dashboard and fund it, then retry."
-                      : 'ClawPump rejected the launch. See clawpumpResponse for details.';
-
-        return NextResponse.json({
-          success: false,
-          launchStatus: 'rejected_by_clawpump',
-          clawpumpStatus: cpRes.status,
-          clawpumpError: cpError,
-          clawpumpResponse: onChain,
-          clawpumpAgentId,
-          hint,
-        }, { status: 502 });
-      }
+      outcome = env === 'gasless'
+        ? await launchGasless({ name, symbol, description, imageUrl, txSignature, devBuyAmountUsd, devBuySlippageBps }, agent, Boolean(selfFunded))
+        : await launchManaged({ name, symbol, description, imageUrl }, agent);
     } catch (e: any) {
       return NextResponse.json({ error: `ClawPump call failed: ${e.message}` }, { status: 502 });
+    }
+
+    onChain = outcome.data;
+
+    if (outcome.ok) {
+      mintAddress = outcome.mintAddress;
+      txSig = outcome.txSignature;
+      pumpFunUrl = outcome.pumpFunUrl;
+      launchStatus = 'launched_on_pumpfun';
+    } else {
+      const cpError = outcome.data?.error || `HTTP ${outcome.status}`;
+      return NextResponse.json({
+        success: false,
+        environment: env,
+        launchStatus: 'rejected_by_clawpump',
+        clawpumpStatus: outcome.status,
+        clawpumpError: cpError,
+        clawpumpResponse: outcome.data,
+        hint: hintFor(env, outcome.status, String(cpError)),
+      }, { status: outcome.status === 200 ? 502 : outcome.status });
     }
   }
 
@@ -103,9 +174,10 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     success: true,
+    environment: usedEnv,
     launchStatus,
     mintAddress,
-    txSignature,
+    txSignature: txSig,
     pumpFunUrl,
     clawpump: onChain,
     feedPostId: post.id,
