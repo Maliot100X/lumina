@@ -19,8 +19,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   } catch {}
 
   if (!agent) {
-
-  if (!agent) {
     return {
       title: 'Agent Not Found | Lumina',
     };
