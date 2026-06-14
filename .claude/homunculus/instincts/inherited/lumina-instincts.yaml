@@ -1,0 +1,390 @@
+# Instincts generated from https://github.com/Maliot100X/lumina
+# Generated: 2026-06-01T23:10:00.696Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: lumina-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/Maliot100X/lumina
+---
+
+# Lumina Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: feat
+
+## Evidence
+
+- 3 commits analyzed
+- Detected conventional commit pattern
+- Examples: feat: added subtle 3D stars background + interactive 3D Floating Agent Orb in hero, inspired by react-threejs-portfolio for cooler premium feel while preserving Sovereign dark gold design
+
+---
+id: lumina-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/Maliot100X/lumina
+---
+
+# Lumina Commit Length
+
+## Action
+
+Write detailed commit messages (~186 characters for first line)
+
+## Evidence
+
+- Average commit message length: 186 chars
+- Based on 3 commits
+
+---
+id: lumina-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Maliot100X/lumina
+---
+
+# Lumina Naming Files
+
+## Action
+
+Use PascalCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: PascalCase
+
+---
+id: lumina-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Maliot100X/lumina
+---
+
+# Lumina Export Style
+
+## Action
+
+Prefer default exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: default
+
+---
+id: lumina-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/Maliot100X/lumina
+---
+
+# Lumina Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: lumina-workflow-add-or-enhance-3d-hero-visuals
+trigger: "when doing add or enhance 3d hero visuals"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Maliot100X/lumina
+---
+
+# Lumina Workflow Add Or Enhance 3d Hero Visuals
+
+## Action
+
+Follow the add-or-enhance-3d-hero-visuals workflow:
+1. Edit or enhance app/page.tsx to integrate new or updated 3D visual components.
+2. Create or modify components in components/canvas/ (e.g., FloatingOrb.tsx, Stars.tsx, LuminaVideoFrame.tsx) to implement the 3D feature.
+3. Update package.json and package-lock.json if new dependencies are required for 3D rendering or animation.
+4. Test the hero section to ensure new visuals render and interact correctly.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: app/page.tsx, components/canvas/*.tsx, package.json
+
+---
+id: lumina-instinct-file-naming
+trigger: "When creating a new file in the codebase"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct File Naming
+
+## Action
+
+Name the file using PascalCase (e.g., FloatingOrb.tsx)
+
+## Evidence
+
+- Pattern in namingConventions.files
+- Seen in components/canvas/FloatingOrb.tsx
+
+---
+id: lumina-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct Function Naming
+
+## Action
+
+Use camelCase for function names
+
+## Evidence
+
+- Pattern in namingConventions.functions
+- Seen in components/canvas/Stars.tsx
+
+---
+id: lumina-instinct-class-naming
+trigger: "When defining a new class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct Class Naming
+
+## Action
+
+Use PascalCase for class names
+
+## Evidence
+
+- Pattern in namingConventions.classes
+- Seen in components/canvas/LuminaVideoFrame.tsx
+
+---
+id: lumina-instinct-constant-naming
+trigger: "When declaring a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for constant names
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: lumina-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct Import Style
+
+## Action
+
+Use absolute import paths
+
+## Evidence
+
+- Pattern in importStyle
+- Seen in components/canvas/ imports
+
+---
+id: lumina-instinct-export-style
+trigger: "When exporting a module or component"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct Export Style
+
+## Action
+
+Use default export style
+
+## Evidence
+
+- Pattern in exportStyle
+- Seen in components/canvas/ exports
+
+---
+id: lumina-instinct-git-commit-format
+trigger: "When making a git commit"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct Git Commit Format
+
+## Action
+
+Format the commit message using the conventional commit style, starting with 'feat:' for new features
+
+## Evidence
+
+- Pattern in commits.prefixes
+- Seen in commit: 'feat: added subtle 3D stars background + interactive 3D Floating Agent Orb in hero...'
+
+---
+id: lumina-instinct-git-commit-length
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct Git Commit Length
+
+## Action
+
+Include detailed descriptions, aiming for an average commit message length around 186 characters
+
+## Evidence
+
+- Pattern in commits.averageLength
+- Seen in example commit
+
+---
+id: lumina-instinct-3d-hero-visual-workflow-edit-page
+trigger: "When adding or enhancing 3D visuals in the hero section"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct 3d Hero Visual Workflow Edit Page
+
+## Action
+
+Edit or enhance app/page.tsx to integrate new or updated 3D visual components
+
+## Evidence
+
+- Workflow: add-or-enhance-3d-hero-visuals
+- Seen in commit sequence and files involved
+
+---
+id: lumina-instinct-3d-hero-visual-workflow-canvas-components
+trigger: "When implementing or updating 3D features in the hero section"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct 3d Hero Visual Workflow Canvas Components
+
+## Action
+
+Create or modify components in components/canvas/ (e.g., FloatingOrb.tsx, Stars.tsx, LuminaVideoFrame.tsx)
+
+## Evidence
+
+- Workflow: add-or-enhance-3d-hero-visuals
+- Seen in commit sequence and files involved
+
+---
+id: lumina-instinct-3d-hero-visual-workflow-update-deps
+trigger: "When new dependencies are required for 3D rendering or animation"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct 3d Hero Visual Workflow Update Deps
+
+## Action
+
+Update package.json and package-lock.json to include necessary dependencies
+
+## Evidence
+
+- Workflow: add-or-enhance-3d-hero-visuals
+- Seen in commit sequence and files involved
+
+---
+id: lumina-instinct-3d-hero-visual-workflow-test
+trigger: "After implementing or updating 3D visuals in the hero section"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct 3d Hero Visual Workflow Test
+
+## Action
+
+Test the hero section to ensure new visuals render and interact correctly
+
+## Evidence
+
+- Workflow: add-or-enhance-3d-hero-visuals
+- Seen in commit sequence
+
+---
+id: lumina-instinct-testing-location
+trigger: "When adding or updating tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: Maliot100X/lumina
+---
+
+# Lumina Instinct Testing Location
+
+## Action
+
+Place tests in a separate location from source files
+
+## Evidence
+
+- Pattern in architecture.testLocation
+
